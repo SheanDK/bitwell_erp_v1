@@ -1,5 +1,11 @@
-//backend/src/modules/tenant/tenant.module.ts
+/* Path: backend/src/modules/tenant/tenant.module.ts */
 import { Module } from '@nestjs/common';
+import { TenantController } from './tenant.controller';
+import { TenantService } from './tenant.service';
 
-@Module({})
+@Module({
+    controllers: [TenantController],
+    providers: [TenantService],
+    exports: [TenantService],
+})
 export class TenantModule { }

@@ -7,15 +7,46 @@ import { Knex } from 'knex';
 export class InventoryService {
     constructor(@InjectConnection() private readonly knex: Knex) { }
 
-    // භාණ්ඩ සහ ඒවා තිබෙන රාක්ක විස්තර සහිතව ලබා ගැනීම
-    async getInventoryWithRacks() {
-        return await this.knex('items')
-            .join('racks', 'items.rack_id', '=', 'racks.id')
-            .select('items.*', 'racks.code as rack_code');
+    async findAll() {
+        return await this.knex('items').withSchema('tenant_company1').select('*');
     }
 
-    // අලුත් භාණ්ඩයක් රාක්කයකට ඇතුළත් කිරීම
-    async addItem(data: { name: string; sku: string; rack_id: string; quantity: number }) {
-        return await this.knex('items').insert(data);
+    async addItem(data: { name: string; sku: string; quantity: number; price: number; cost_price: number; barcode?: string; weight?: number; image_url?: string }) {
+        return await this.knex('items')
+            .withSchema('tenant_company1')
+            .insert({
+                name: data.name,
+                sku: data.sku,
+                quantity: data.quantity,
+                price: data.price,
+                cost_price: data.cost_price,
+                barcode: data.barcode,
+                weight: data.weight,
+                image_url: data.image_url
+            });
+    }
+
+    async updateItemLocationByQR(itemSku: string, rackCode: string) {
+        return await this.knex.transaction(async (trx) => {
+            const rack = await trx('racks')
+                .withSchema('tenant_company1')
+                .where({ code: rackCode })
+                .first();
+
+            if (!rack) {
+                throw new Error(`Rack section '${rackCode}' not found in database.`);
+            }
+
+            const updated = await trx('items')
+                .withSchema('tenant_company1')
+                .where({ sku: itemSku })
+                .update({ rack_id: rack.id });
+
+            if (!updated) {
+                throw new Error(`Product with SKU '${itemSku}' not found.`);
+            }
+
+            return { message: `Product '${itemSku}' successfully mapped to Rack '${rackCode}'.` };
+        });
     }
 }

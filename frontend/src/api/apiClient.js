@@ -1,13 +1,13 @@
+// frontend/src/api/apiClient.js
 import axios from 'axios';
 
 const apiClient = axios.create({
-    baseURL: 'http://localhost:3000', // ඔබේ NestJS server එකේ port එක
+  baseURL: 'http://localhost:3000',
 });
 
-// Tenant ID එක Header එකට එකතු කිරීම
 apiClient.interceptors.request.use((config) => {
-    config.headers['x-tenant-id'] = 'company1'; // තාවකාලිකව පරීක්ෂා කිරීමට 'company1' ලෙස යොදන්න
-    return config;
+  config.headers['x-tenant-id'] = 'company1'; 
+  return config;
 });
 
 export default apiClient;
