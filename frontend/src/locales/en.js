@@ -62,7 +62,8 @@ export const en = {
     sku: "SKU",
     quantity: "Quantity",
     cancel: "Cancel",
-    save: "Save"
+    save: "Save",
+    description: "Register product specifications, global identity codes, and cost structures."
   },
   superAdmin: {
     title: "SaaS Core Engine",

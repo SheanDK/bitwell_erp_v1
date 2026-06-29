@@ -7,13 +7,25 @@ import { Knex } from 'knex';
 export class InventoryService {
     constructor(@InjectConnection() private readonly knex: Knex) { }
 
+    // withSchema ඉවත් කළා - දැන් එය 100% Dynamic වේ
     async findAll() {
-        return await this.knex('items').withSchema('tenant_company1').select('*');
+        return await this.knex('items')
+            .leftJoin('racks', 'items.rack_id', '=', 'racks.id')
+            .select(
+                'items.id',
+                'items.name',
+                'items.sku',
+                'items.quantity',
+                'items.price',
+                'items.cost_price',
+                'items.image_url',
+                'racks.code as rack_code',
+                'racks.description as rack_description'
+            );
     }
 
     async addItem(data: { name: string; sku: string; quantity: number; price: number; cost_price: number; barcode?: string; weight?: number; image_url?: string }) {
         return await this.knex('items')
-            .withSchema('tenant_company1')
             .insert({
                 name: data.name,
                 sku: data.sku,
@@ -29,7 +41,6 @@ export class InventoryService {
     async updateItemLocationByQR(itemSku: string, rackCode: string) {
         return await this.knex.transaction(async (trx) => {
             const rack = await trx('racks')
-                .withSchema('tenant_company1')
                 .where({ code: rackCode })
                 .first();
 
@@ -38,7 +49,6 @@ export class InventoryService {
             }
 
             const updated = await trx('items')
-                .withSchema('tenant_company1')
                 .where({ sku: itemSku })
                 .update({ rack_id: rack.id });
 

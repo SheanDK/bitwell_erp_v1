@@ -14,6 +14,8 @@ const InventoryPage = () => {
 
     const [items, setItems] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Double Binding සඳහා සියලුම Fields මුලින්ම සක්‍රීය කිරීම
     const [newItem, setNewItem] = useState({
         name: '',
         sku: '',
@@ -43,13 +45,14 @@ const InventoryPage = () => {
     const handleAddItem = (e) => {
         e.preventDefault();
 
-        // 2. Real-time Save & Dynamic Popup Closing
+        // Real-time Save & Dynamic Popup Closing
         apiClient.post('/inventory/add', newItem)
             .then(() => {
-                setIsModalOpen(false);
-                fetchInventory();
+                setIsModalOpen(false); // Popup එක වසන්න
+                fetchInventory(); // Live reload table
                 showNotification('success', t('inventory.success') || 'Product added successfully.');
 
+                // Form එක පිරිසිදු කිරීම (Form Reset)
                 setNewItem({
                     name: '',
                     sku: '',
@@ -62,7 +65,7 @@ const InventoryPage = () => {
             })
             .catch(err => {
                 console.error("Error adding product:", err);
-                showNotification('error', 'Failed to add product. Check authorization or DB schema.');
+                showNotification('error', 'Failed to add product. Access Denied or DB Schema Error.');
             });
     };
 
@@ -79,7 +82,7 @@ const InventoryPage = () => {
             header: t('inventory.product'),
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
-                    {/* Placeholder image issue fixed: SVG Avatar */}
+                    {/* Reusable UI: image_url නොමැති නම් දේශීය SVG Avatar එකක් පෙන්වීම */}
                     {row.original.image_url ? (
                         <img
                             src={row.original.image_url}
@@ -87,8 +90,8 @@ const InventoryPage = () => {
                             className="w-10 h-10 object-cover rounded-xl shadow-sm border border-gray-100 dark:border-slate-800"
                         />
                     ) : (
-                        <div className="w-10 h-10 bg-indigo-50 dark:bg-slate-850 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center font-bold text-xs shadow-sm">
-                            {row.original.name ? row.original.name.charAt(0).toUpperCase() : 'P'}
+                        <div className="w-10 h-10 bg-indigo-50 dark:bg-slate-850 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center font-bold text-xs shadow-sm uppercase">
+                            {row.original.name ? row.original.name.charAt(0) : 'P'}
                         </div>
                     )}
                     <div>
@@ -98,7 +101,10 @@ const InventoryPage = () => {
                 </div>
             )
         },
-        { header: t('inventory.acquisitionPrice'), cell: ({ row }) => `USD ${row.original.price || '0.00'}` },
+        {
+            header: t('inventory.acquisitionPrice'),
+            cell: ({ row }) => `USD ${Number(row.original.price || 0).toFixed(2)}`
+        },
         { header: t('inventory.inStock'), accessorKey: 'quantity' },
         {
             header: t('inventory.status'),
@@ -119,29 +125,43 @@ const InventoryPage = () => {
         }
     ], [lang]);
 
-    const renderRowDetails = (item) => (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-sm text-gray-600 dark:text-slate-400 items-center">
-            <div>
-                <h4 className="font-bold text-gray-800 dark:text-white mb-2">{t('inventory.locationInfo')}</h4>
-                <p>{t('inventory.warehouse')}</p>
-                <p>{t('inventory.rackSection')}: {item.rack_code || t('inventory.notAssigned')}</p>
+    const renderRowDetails = (item) => {
+        const costPrice = Number(item.cost_price) || 0;
+        const salePrice = Number(item.price) || 0;
+        const quantity = Number(item.quantity) || 0;
+
+        const totalCostValue = costPrice * quantity;
+        const totalAssetValue = salePrice * quantity;
+
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-sm text-gray-600 dark:text-slate-400 items-center">
+                <div>
+                    <h4 className="font-bold text-gray-800 dark:text-white mb-2">{t('inventory.locationInfo')}</h4>
+                    <p>{t('inventory.warehouse')}</p>
+                    <p className="flex items-center gap-1.5">
+                        {t('inventory.rackSection')}: {' '}
+                        <span className="font-bold text-indigo-600 dark:text-indigo-400">
+                            {item.rack_code || t('inventory.notAssigned')}
+                        </span>
+                    </p>
+                </div>
+                <div>
+                    <h4 className="font-bold text-gray-800 dark:text-white mb-2">{t('inventory.financialValuation')}</h4>
+                    <p>{t('inventory.assetValue')}: USD {totalAssetValue.toLocaleString()}</p>
+                    <p>{t('inventory.costPrice')}: USD {totalCostValue.toLocaleString()} (Cost: USD {costPrice})</p>
+                </div>
+                <div>
+                    <h4 className="font-semibold mb-2 text-gray-800 dark:text-white">{t('inventory.quickActions')}</h4>
+                    <button className="text-xs bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg border dark:border-slate-700 transition">
+                        {t('inventory.changeLocation')}
+                    </button>
+                </div>
+                <div className="flex justify-end md:col-span-1">
+                    <QrGenerator value={item.sku} title={item.name} />
+                </div>
             </div>
-            <div>
-                <h4 className="font-bold text-gray-800 dark:text-white mb-2">{t('inventory.financialValuation')}</h4>
-                <p>{t('inventory.assetValue')}: USD {item.price * item.quantity || 0}</p>
-                <p>{t('inventory.costPrice')}: USD {item.price || 0}</p>
-            </div>
-            <div>
-                <h4 className="font-semibold mb-2 text-gray-800 dark:text-white">{t('inventory.quickActions')}</h4>
-                <button className="text-xs bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg border dark:border-slate-700 transition">
-                    {t('inventory.changeLocation')}
-                </button>
-            </div>
-            <div className="flex justify-end md:col-span-1">
-                <QrGenerator value={item.sku} title={item.name} />
-            </div>
-        </div>
-    );
+        );
+    };
 
     return (
         <div className="p-6 space-y-6 relative">
@@ -181,7 +201,7 @@ const InventoryPage = () => {
             {/* Quick Adding Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm z-50 p-4">
-                    <form onSubmit={handleAddItem} className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 p-8 rounded-3xl w-full max-w-2xl space-y-6 shadow-xl transition-all">
+                    <form onSubmit={handleAddItem} className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 p-8 rounded-3xl w-full max-w-2xl space-y-6 shadow-xl transition-all max-h-[90vh] overflow-y-auto">
 
                         <div>
                             <h3 className="text-xl font-bold text-gray-800 dark:text-white">{t('inventory.addTitle')}</h3>

@@ -62,7 +62,8 @@ export const fi = {
     sku: "SKU",
     quantity: "Määrä",
     cancel: "Peruuta",
-    save: "Tallenna"
+    save: "Tallenna",
+    description: "Rekisteröi tuotteen tiedot, globaalit tunnuskoodit ja kustannusrakenteet."
   },
   superAdmin: {
     title: "SaaS-ydinmoottori",

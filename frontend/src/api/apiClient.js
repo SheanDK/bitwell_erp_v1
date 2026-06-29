@@ -1,4 +1,4 @@
-// frontend/src/api/apiClient.js
+/* Path: frontend/src/api/apiClient.js */
 import axios from 'axios';
 
 const apiClient = axios.create({
@@ -6,8 +6,19 @@ const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use((config) => {
-  config.headers['x-tenant-id'] = 'company1'; 
+  const token = localStorage.getItem('token');
+  const tenantId = localStorage.getItem('tenant_id') || 'company1';
+
+  config.headers['x-tenant-id'] = tenantId;
+
+
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+
   return config;
+}, (error) => {
+  return Promise.reject(error);
 });
 
 export default apiClient;

@@ -1,6 +1,5 @@
-//backend/src/modules/auth/auth.service.ts
-
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+/* Path: backend/src/modules/auth/auth.service.ts */
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { InjectConnection } from 'nestjs-knex';
@@ -8,8 +7,12 @@ import { Knex } from 'knex';
 
 @Injectable()
 export class AuthService {
-    constructor(@InjectConnection() private readonly knex: Knex, private jwtService: JwtService) { }
+    constructor(
+        @InjectConnection() private readonly knex: Knex,
+        private readonly jwtService: JwtService
+    ) { }
 
+    // 1. User login (with is_active & tenant suspension checks)
     async login(email: string, pass: string) {
         const user = await this.knex('users').withSchema('public').where({ email }).first();
 
@@ -17,12 +20,12 @@ export class AuthService {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        // 1. check user is active
+        // Check if user is active
         if (user.is_active === false || user.is_active === 0) {
             throw new UnauthorizedException('Your account has been suspended by the administrator.');
         }
 
-        // 2. check tenant is active
+        // Check if organization workspace is active
         if (user.tenant_id) {
             const tenant = await this.knex('tenants').withSchema('public').where({ id: user.tenant_id }).first();
             if (tenant && (tenant.is_active === false || tenant.is_active === 0)) {
@@ -42,7 +45,7 @@ export class AuthService {
         };
     }
 
-    // 1. get all users
+    // 2. Get all users for SUPER_ADMIN
     async findAllUsers() {
         return await this.knex('users')
             .withSchema('public')
@@ -58,12 +61,48 @@ export class AuthService {
             );
     }
 
-    // 2. toggle user status
+    // 3. Toggle global user status for SUPER_ADMIN
     async toggleUserStatus(id: string, isActive: boolean) {
         return await this.knex('users')
             .withSchema('public')
             .where({ id })
             .update({ is_active: isActive });
     }
-}
 
+    // 4. Helper to find tenant by slug
+    async findTenantBySlug(slug: string) {
+        return await this.knex('tenants')
+            .withSchema('public')
+            .where({ slug })
+            .first();
+    }
+
+    // 5. Get users belonging to a specific tenant for TENANT_ADMIN
+    async findTenantUsers(tenantId: string) {
+        return await this.knex('users')
+            .withSchema('public')
+            .where({ tenant_id: tenantId })
+            .andWhere('role', '!=', 'SUPER_ADMIN')
+            .select('id', 'email', 'role', 'is_active', 'created_at');
+    }
+
+    // 6. Create tenant user (Staff) inside isolated tenant
+    async createTenantUser(email: string, pass: string, role: string, tenantId: string) {
+        const exists = await this.knex('users').withSchema('public').where({ email }).first();
+        if (exists) {
+            throw new BadRequestException('Email address is already registered.');
+        }
+
+        const passwordHash = await bcrypt.hash(pass, 10);
+
+        await this.knex('users').withSchema('public').insert({
+            email,
+            password_hash: passwordHash,
+            role: role || 'USER',
+            tenant_id: tenantId,
+            is_active: true
+        });
+
+        return { message: 'User created successfully.' };
+    }
+}
