@@ -12,7 +12,6 @@ export class AuthService {
         private readonly jwtService: JwtService
     ) { }
 
-    // 1. User login (with is_active & tenant suspension checks)
     async login(email: string, pass: string) {
         const user = await this.knex('users').withSchema('public').where({ email }).first();
 
@@ -20,16 +19,19 @@ export class AuthService {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        // Check if user is active
         if (user.is_active === false || user.is_active === 0) {
             throw new UnauthorizedException('Your account has been suspended by the administrator.');
         }
 
-        // Check if organization workspace is active
+        let tenantSlug = 'superadmin';
+
         if (user.tenant_id) {
             const tenant = await this.knex('tenants').withSchema('public').where({ id: user.tenant_id }).first();
-            if (tenant && (tenant.is_active === false || tenant.is_active === 0)) {
-                throw new UnauthorizedException('Your organization workspace has been suspended.');
+            if (tenant) {
+                if (tenant.is_active === false || tenant.is_active === 0) {
+                    throw new UnauthorizedException('Your organization workspace has been suspended.');
+                }
+                tenantSlug = tenant.slug;
             }
         }
 
@@ -41,7 +43,8 @@ export class AuthService {
         return {
             access_token: this.jwtService.sign(payload),
             role: user.role,
-            tenant_id: user.tenant_id
+            tenant_id: user.tenant_id,
+            tenant_slug: tenantSlug
         };
     }
 

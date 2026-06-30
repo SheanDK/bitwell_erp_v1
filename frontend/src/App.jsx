@@ -9,6 +9,7 @@ import DeployTenantPage from './pages/DeployTenantPage';
 import GlobalUsersPage from './pages/GlobalUsersPage';
 import SystemAuditPage from './pages/SystemAuditPage';
 import SettingsPage from './pages/SettingsPage';
+import ManageUsersPage from './pages/ManageUsersPage';
 
 function App() {
     return (
@@ -24,6 +25,7 @@ function App() {
                     <Route path="users" element={<GlobalUsersPage />} />
                     <Route path="audit" element={<SystemAuditPage />} />
                     <Route path="settings" element={<SettingsPage />} />
+                    <Route path="manage-users" element={<ManageUsersPage />} />
                 </Route>
             </Routes>
         </Router>

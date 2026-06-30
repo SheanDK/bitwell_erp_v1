@@ -21,6 +21,7 @@ const Sidebar = ({ lang }) => {
     const tenantMenu = [
         { name: t('sidebar.dashboard'), icon: <LayoutDashboard size={20} />, path: '/' },
         { name: t('sidebar.inventory'), icon: <Package size={20} />, path: '/inventory' },
+        { name: t('sidebar.manageUsers'), icon: <Users size={20} />, path: '/manage-users' },
         { name: t('sidebar.settings'), icon: <Settings size={20} />, path: '/settings' },
     ];
 

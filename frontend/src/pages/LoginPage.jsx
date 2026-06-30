@@ -22,7 +22,7 @@ const LoginPage = () => {
 
             localStorage.setItem('token', res.data.access_token);
             localStorage.setItem('role', res.data.role);
-            localStorage.setItem('tenant_id', res.data.tenant_id || 'superadmin');
+            localStorage.setItem('tenant_id', res.data.tenant_slug || 'superadmin');
             localStorage.setItem('user_email', email);
 
             navigate('/');

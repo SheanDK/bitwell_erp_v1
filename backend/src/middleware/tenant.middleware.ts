@@ -9,20 +9,35 @@ export class TenantMiddleware implements NestMiddleware {
     constructor(@InjectConnection() private readonly knex: Knex) { }
 
     async use(req: Request, res: Response, next: NextFunction) {
-        const tenantId = req.headers['x-tenant-id'];
-        console.log("Tenant ID received:", tenantId);
+        if (req.method === 'OPTIONS') {
+            return next();
+        }
 
-        if (!tenantId) {
+        const tenantSlug = req.headers['x-tenant-id'] as string;
+
+        if (!tenantSlug) {
             return res.status(400).json({ message: 'x-tenant-id header is missing' });
         }
 
-        const schemaName = `tenant_${(tenantId as string).replace(/-/g, '_')}`;
-
         try {
-            await this.knex.raw('SET search_path TO ??', [schemaName]);
+            const tenant = await this.knex('tenants')
+                .withSchema('public')
+                .where({ slug: tenantSlug })
+                .first();
+
+            if (!tenant) {
+                return res.status(404).json({ message: `Workspace '${tenantSlug}' not found.` });
+            }
+
+            const schemaName = tenant.db_schema;
+
+            await this.knex.raw(`SET search_path TO ??`, [schemaName]);
+
+            console.log(`[Middleware] Switched DB Context to Schema: ${schemaName}`);
             next();
         } catch (error) {
-            return res.status(500).json({ message: 'Invalid tenant schema' });
+            console.error("Middleware DB Routing Error:", error);
+            return res.status(500).json({ message: 'Database routing failed.' });
         }
     }
 }
