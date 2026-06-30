@@ -9,7 +9,8 @@ export const sw = {
     systemAudit: "Systemrevision",
     settings: "Arbetsyteinställningar",
     logout: "Logga ut",
-    version: "Version"
+    version: "Version",
+    manageUsers: "Simamia Watumiaji"
   },
   header: {
     title: "Bitwell-instrumentpanel"
@@ -172,9 +173,30 @@ export const sw = {
     accessDenied: "Åtkomst nekad",
     noPermission: "Du har inte tillräckliga behörigheter för att visa denna resurs."
   },
-    plans: {
+  plans: {
     basic: "Perus",
     pro: "Ammattilainen",
     enterprise: "Yritys"
-    }
+  },
+  manageUsers: {
+    title: "",
+    subtitle: "Manage user credentials and warehouse access levels for your organization.",
+    searchPlaceholder: "Search by email or role...",
+    addStaff: "Add Staff Member",
+    emailIdentity: "Email Identity",
+    accessLevel: "Workspace Access Level",
+    joinedDate: "Joined Date",
+    accountStatus: "Account Status",
+    exportList: "Export List",
+    role: "Access Level (Role)",
+    workspace: "Assigned Workspace",
+    newStaffMember: "Add New Staff Member",
+    coManager: "Co-Manager (Full Access)",
+    warehouseStaff: "Warehouse Staff (Standard Access)",
+    addUser: "Add User",
+    cancel: "Cancel",
+    actions: "Actions",
+    active: "Active",
+    suspended: "Suspended"
+  }
 };

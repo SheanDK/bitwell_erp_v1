@@ -9,7 +9,8 @@ export const fi = {
     systemAudit: "Järjestelmän tarkastus",
     settings: "Työtilan asetukset",
     logout: "Kirjaudu ulos",
-    version: "Versio"
+    version: "Versio",
+    manageUsers: "Hallitse käyttäjiä"
   },
   header: {
     title: "Bitwell-kojelauta"
@@ -172,9 +173,30 @@ export const fi = {
     accessDenied: "Pääsy evätty",
     noPermission: "Sinulla ei ole riittäviä oikeuksia tämän resurssin tarkasteluun."
   },
-    plans: {
+  plans: {
     basic: "Perus",
     pro: "Ammattilainen",
     enterprise: "Yritys"
-    }
+  },
+  manageUsers: {
+    title: "Henkilökunnan hallinta",
+    subtitle: "Hallitse käyttäjien kirjautumisia ja käyttöoikeustasoja organisaatiossasi.",
+    searchPlaceholder: "Hae sähköpostilla tai roolilla...",
+    addStaff: "Lisää työntekijä",
+    emailIdentity: "Sähköposti",
+    accessLevel: "Käyttöoikeustaso",
+    joinedDate: "Liittymispäivä",
+    accountStatus: "Tilin tila",
+    exportList: "Vie lista",
+    role: "Käyttöoikeustaso (Rooli)",
+    workspace: "Työtila",
+    newStaffMember: "Lisää työntekijä",
+    coManager: "Varajohtaja (Kaikki oikeudet)",
+    warehouseStaff: "Varastotyöntekijä (Standardi pääsy)",
+    addUser: "Lisää käyttäjä",
+    cancel: "Peruuta",
+    actions: "Toiminnot",
+    active: "Aktiivinen",
+    suspended: "Keskeytetty"
+  }
 };

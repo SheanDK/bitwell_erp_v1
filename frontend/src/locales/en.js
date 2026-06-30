@@ -9,7 +9,8 @@ export const en = {
     systemAudit: "System Audit",
     settings: "Workspace Configurations",
     logout: "Log Out",
-    version: "Version"
+    version: "Version",
+    manageUsers: "Manage Users"
   },
   header: {
     title: "Bitwell Dashboard"
@@ -172,9 +173,30 @@ export const en = {
     accessDenied: "Access Denied",
     noPermission: "You do not have sufficient permissions to view this resource."
   },
-    plans: {
+  plans: {
     basic: "Basic",
     pro: "Pro",
     enterprise: "Enterprise"
-    }
+  },
+  manageUsers: {
+    title: "Staff Management",
+    subtitle: "Manage user credentials and warehouse access levels for your organization.",
+    searchPlaceholder: "Search by email or role...",
+    addStaff: "Add Staff Member",
+    emailIdentity: "Email Identity",
+    accessLevel: "Workspace Access Level",
+    joinedDate: "Joined Date",
+    accountStatus: "Account Status",
+    exportList: "Export List",
+    role: "Access Level (Role)",
+    workspace: "Assigned Workspace",
+    newStaffMember: "Add New Staff Member",
+    coManager: "Co-Manager (Full Access)",
+    warehouseStaff: "Warehouse Staff (Standard Access)",
+    addUser: "Add User",
+    cancel: "Cancel",
+    actions: "Actions",
+    active: "Active",
+    suspended: "Suspended"
+  }
 };
